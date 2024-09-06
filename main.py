@@ -1,16 +1,25 @@
-# This is a sample Python script.
+import time
 
-# Press Mayús+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+from arena_gladiator import ArenaGladiator
+from game_dict import GameDict
+from game_window.executor import Executor
+from log_reader import LogReader
 
+arena_gladiator = ArenaGladiator()
+execute = Executor()
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    LogReader.start_read()
+    while True:
+        execute.start_game()
+        arena_gladiator.play()
+        time.sleep(1)
+        if execute.window.status.win:
+            print('win')
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
+
+
+
+
+

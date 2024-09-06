@@ -4,7 +4,6 @@ import numpy as np
 import traceback
 
 from turn_info import TurnInfo
-from user_config import username
 
 
 class GameDict(TurnInfo):
@@ -22,6 +21,7 @@ class GameDict(TurnInfo):
             from aplication_status import AplicationStatus
             self.started = True
 
+            self.username = None
             self.status = AplicationStatus()
             self.game_state = {}
             self.other_dicts = {}
@@ -35,17 +35,17 @@ class GameDict(TurnInfo):
     @property
     def hero_seat_id(self):
         if players := self.game_room_info.get('gameRoomInfo', {}).get('players'):
-            if players[0].get('playerName') == username:
+            if players[0].get('playerName') == self.username:
                 return players[0].get('teamId')
-            if players[1].get('playerName') == username:
+            if players[1].get('playerName') == self.username:
                 return players[1].get('teamId')
 
     @property
     def villain_seat_id(self):
         if players := self.game_room_info.get('gameRoomInfo', {}).get('players'):
-            if players[0].get('playerName') == username:
+            if players[0].get('playerName') == self.username:
                 return players[1].get('teamId')
-            if players[1].get('playerName') == username:
+            if players[1].get('playerName') == self.username:
                 return players[0].get('teamId')
 
     @property
@@ -121,6 +121,3 @@ class GameDict(TurnInfo):
         while time.time() - self.last_actualization < 0.3:
             time.sleep(0.15)
 
-
-if __name__ == '__main__':
-    g = GameDict()

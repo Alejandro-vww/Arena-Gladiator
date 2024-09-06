@@ -38,6 +38,10 @@ class Coordinates:
         return self.scale_y_1080p(1070)
 
     @property
+    def commander(self):
+        return self.scale_x_1080p(1540), self.scale_y_1080p(1070)
+
+    @property
     def start_button(self):
         return self.scale_x_1080p(1735), self.scale_y_1080p(1005)
 

@@ -2,7 +2,6 @@ import time
 
 from game_dict import GameDict
 from aplication_status import AplicationStatus
-from user_config import username
 
 
 class MessageProcessor:
@@ -22,14 +21,16 @@ class MessageProcessor:
         if gre_2_client := transaction.get('greToClientEvent', {}).get('greToClientMessages'):
             list(map(self.process_messages, gre_2_client))
         # Actions and cursor
-        if client2match_type := transaction.get('clientToMatchServiceMessageType'):
+        if client_2_match_type := transaction.get('clientToMatchServiceMessageType'):
             # Actions
-            if client2match_type == 'ClientToMatchServiceMessageType_ClientToGREMessage':
+            if client_2_match_type == 'ClientToMatchServiceMessageType_ClientToGREMessage':
                 self.game_dict.client_2_match = transaction
                 self.process_actions()
             # Cursor
-            if client2match_type == 'ClientToMatchServiceMessageType_ClientToGREUIMessage':
+            if client_2_match_type == 'ClientToMatchServiceMessageType_ClientToGREUIMessage':
                 self.game_dict.UI_state = transaction
+        if username := transaction.get('authenticateResponse', {}).get('screenName'):
+            self.game_dict.username = username
 
         self.game_dict.last_actualization = time.time()
         pass
@@ -48,7 +49,7 @@ class MessageProcessor:
             try:
                 winning_team = match_val['gameRoomInfo']['finalMatchResult']['resultList'][0]['winningTeamId']
                 winner = match_val['gameRoomInfo']['gameRoomConfig']['reservedPlayers'][winning_team-1]['playerName']
-                result = winner == username
+                result = winner == self.game_dict.username
                 self.app_status.win = result
             except KeyError:
                 self.app_status.win = None

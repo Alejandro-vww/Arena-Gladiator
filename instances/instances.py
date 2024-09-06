@@ -19,7 +19,7 @@ class Instances:
     def num(self, inst_no):
         if self.game_dict.game_state_id > self._game_state_id_v:
             self._update()
-        return self._instances.get(inst_no)
+        return self._instances.get(inst_no, Card({}))
 
     def zone(self, zone_number):
         for zone in self.game_dict.game_state.get('zones', []):
@@ -30,8 +30,16 @@ class Instances:
     @property
     def hand(self):
         if hero_seat := self.game_dict.hero_seat_id:
-            return self.zone(27 + hero_seat * 4)
+            return self.zone(27 + hero_seat * 4) + self.commander
         return []
+
+    @property
+    def commanders(self):
+        return self.zone(26)
+
+    @property
+    def commander(self):
+        return list(commander for commander in self.commanders if commander.owned)
 
     @property
     def battlefield(self):

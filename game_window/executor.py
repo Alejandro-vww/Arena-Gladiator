@@ -1,12 +1,13 @@
 import pydirectinput
 import time
 import game_dict
+from exceptions import EscPressedError
 from game_window.coordinates import Coordinates
 from log_reader import LogReader
 from data_base.data_manager import grp_id_order
 from recruiter import Recruiter
 from field_marshal import FieldMarshal
-
+import central_unit
 pydirectinput.PAUSE = 0
 
 
@@ -27,6 +28,7 @@ class Executor(Recruiter, FieldMarshal):
             from game_window.window import Window
             self.window = Window()
             self.coord = Coordinates(self.window)
+            central_unit.start_listeners()
 
     def start_game(self):
         time_limit = 5 * 60
@@ -166,32 +168,43 @@ class Executor(Recruiter, FieldMarshal):
             time.sleep(0.3)
         self.space()
 
+
     # LOW LEVEL MOUSE & KEYBOARDS FUNCTIONS
 
     def move_to(self, x, y, check=True):
+        if central_unit.stop:
+            raise EscPressedError
         if check:
             pydirectinput.moveTo(x + self.window.left, y + self.window.top)
         else:
             pydirectinput.moveTo(x + self.window.unchecked_left, y + self.window.unchecked_top)
 
     def move(self, x, y):
+        if central_unit.stop:
+            raise EscPressedError
         pydirectinput.move(self.coord.scale_x_1080p(x), self.coord.scale_y_1080p(y))
         time.sleep(0.2)
 
     def click(self):
+        if central_unit.stop:
+            raise EscPressedError
         pydirectinput.mouseDown()
-        time.sleep(0.2)
+        time.sleep(0.1)
         pydirectinput.mouseUp()
 
     def space(self):
+        if central_unit.stop:
+            raise EscPressedError
         self.window.check_status()
         pydirectinput.keyDown("space")
-        time.sleep(0.2)
+        time.sleep(0.1)
         pydirectinput.keyUp("space")
 
     def escape(self):
+        if central_unit.stop:
+            raise EscPressedError
         pydirectinput.keyDown("escape")
-        time.sleep(0.2)
+        time.sleep(0.1)
         pydirectinput.keyUp("escape")
 
 
