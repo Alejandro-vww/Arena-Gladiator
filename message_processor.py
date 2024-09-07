@@ -31,6 +31,8 @@ class MessageProcessor:
                 self.game_dict.UI_state = transaction
         if username := transaction.get('authenticateResponse', {}).get('screenName'):
             self.game_dict.username = username
+        if transaction.get('CourseId'):
+            print(transaction)
 
         self.game_dict.last_actualization = time.time()
         pass
@@ -39,7 +41,7 @@ class MessageProcessor:
         self.game_dict.game_room_info.update(match_val)
         game_info = match_val.get('gameRoomInfo', {}).get('stateType')
         if game_info == 'MatchGameRoomStateType_Playing':
-            self.app_status.screen ='Playing'
+            self.app_status.screen = 'Playing'
             self.app_status.win = None
             self.app_status.mulligan = True
         else:

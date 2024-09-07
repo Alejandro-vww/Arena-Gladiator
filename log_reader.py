@@ -64,6 +64,7 @@ class LogReader:
 
 if __name__ == '__main__':
     LogReader.start_read()
+    from game_dict import GameDict
     while True:
         time.sleep(1)
 

@@ -1,3 +1,6 @@
+import time
+
+from log_reader import LogReader
 from user_interface import Application
 
 
@@ -7,7 +10,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    LogReader.start_read()
+    while True:
+        time.sleep(1)
 
 
 
