@@ -35,7 +35,6 @@ class DefaultMode:
 
     @staticmethod
     def main_phase_1():
-        print('phase 1')
         execute.play_optimized_cards()
         game_dict.wait_reading()
         if not Evaluator.optimize():
@@ -43,12 +42,10 @@ class DefaultMode:
 
     @staticmethod
     def declare_attackers():
-        print('attackers')
         execute.attack_if_kill()
 
     @staticmethod
     def main_phase_2():
-        print('phase 2')
         execute.space()
 
 

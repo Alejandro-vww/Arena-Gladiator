@@ -53,6 +53,7 @@ class FieldMarshal:
             attackers = list(minion for minion in self.game_dict.instances.offensive_army if minion.grp_id in attackers)
         # Check if the requested attackers are correct
         attackers = list(minion for minion in attackers if minion.attack_ready)
+
         # Cancel attack if got an empty list
         if not attackers:
             while game_dict.declare_attackers_phase:
@@ -63,8 +64,9 @@ class FieldMarshal:
         if game_dict.declare_attackers_phase and len(attackers) == len(game_dict.instances.offensive_army):
             if len(self.attack_declared_creatures()) == 0:
                 self.space()
-                time.sleep(0.6)
+                time.sleep(1)
                 self.attack_villain()   # if planeswalker: select villain as objective
+
         # Select loop
         while game_dict.declare_attackers_phase and not self.check_declared_attackers(attackers):
             # Unselect wrong attacked
