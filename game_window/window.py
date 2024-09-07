@@ -4,13 +4,8 @@ import tkinter as tk
 from tkinter import filedialog
 import time
 from aplication_status import AplicationStatus
+from user_config import launcher_path
 
-
-
-# from win32api import GetSystemMetrics GetSystemMetrics(0) = width // GetSystemMetrics(1) = height
-
-
-#Necesita el nombre aproximado para sacar dimensiones de la ventana
 
 class Window:
 
@@ -30,20 +25,25 @@ class Window:
     def __init__(self):
         if not self.hwnd:
             self.open()
+            time.sleep(30)
         from game_window.executor import Executor
         self.execute = Executor()
 
     @property
     def hwnd(self):
-        window_name = 'MTGA'
-        hwnd = win32gui.FindWindow(None, window_name)
-        if hwnd:
-            return hwnd
-        else:
-            return False
+        hwnd_list = []
+        win32gui.EnumWindows(self.callback_hwnd_mtga, hwnd_list)
+
+        return hwnd_list[0] if hwnd_list else False
+
+    @staticmethod
+    def callback_hwnd_mtga(hwnd, hwnd_list):
+        window_title = win32gui.GetWindowText(hwnd)
+        if window_title == 'MTGA':
+            hwnd_list.append(hwnd)
 
     def open(self):
-        file_path = "C:\Program Files\Wizards of the Coast\MTGA\MTGALauncher\MTGALauncher.exe"
+        file_path = launcher_path
 
         if os.path.isfile(file_path):
             os.startfile(file_path)
@@ -70,8 +70,11 @@ class Window:
         if not self.hwnd:
             self.open()
             time.sleep(30)
-        
-        if self.status.screen == 'Confused':
+
+        if self.hwnd != win32gui.GetForegroundWindow():
+            win32gui.SetForegroundWindow(self.hwnd)
+
+        elif self.status.screen == 'Confused':
             self.execute.concede()
             
         elif self.status.screen == 'Bugged':

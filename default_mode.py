@@ -39,7 +39,7 @@ class DefaultMode:
         execute.play_optimized_cards()
         game_dict.wait_reading()
         if not Evaluator.optimize():
-            return True
+            return 'Phase_Combat'
 
     @staticmethod
     def declare_attackers():

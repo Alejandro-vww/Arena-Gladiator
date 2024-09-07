@@ -1,23 +1,33 @@
+import os
 import time
-from pynput import mouse, keyboard
-from user_config import min_afk_time
-from exceptions import EscPressedError
-
+from pynput import keyboard
 
 
 # Playing function
-total_wins = 1
-games_won = 0
-first_execution = True
+def playing_function(total_victories, power_off):
+    from arena_gladiator import ArenaGladiator
+    from game_window.executor import Executor
+    from log_reader import LogReader
 
+    LogReader.start_read()
+    arena_gladiator = ArenaGladiator()
+    execute = Executor()
+    time.sleep(20)
 
-def set_total_wins(wins):
-    global total_wins
-    total_wins = wins
+    games_won = 0
 
+    while total_victories > games_won:
+        if execute.window.status.screen != 'Playing':
+            execute.start_game()
+        if execute.window.status.screen == 'Playing':
+            arena_gladiator.play()
+            time.sleep(1)
+        if execute.window.status.win:
+            games_won += 1
+            print(f'Games won: {games_won}')
 
-def victories_fulfilled():
-    return True if games_won >= total_wins else False
+    if power_off:
+        os.system("shutdown /s /t 0")
 
 
 # Exit when 'esc' is pressed listener

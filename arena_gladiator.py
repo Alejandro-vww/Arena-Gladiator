@@ -21,7 +21,6 @@ class ArenaGladiator:
         self.phases = ["Phase_Beginning", "Phase_Main1", "Phase_Combat", "Phase_Main2", "Phase_Ending"]
 
     def play(self):
-        print('entrando')
         # MULLIGAN
         while self.app_status.mulligan:
             self.game_dict.wait()
@@ -30,7 +29,6 @@ class ArenaGladiator:
 
         # GAME
         while self.app_status.screen == 'Playing':
-            print('nuevo ciclo')
             self.game_dict.wait()
 
             # ZONE 27
@@ -42,7 +40,6 @@ class ArenaGladiator:
 
                 if self.game_dict.phase == 'Phase_Beginning':
                     self.execute.space()
-                    time.sleep(1)
 
                 elif self.game_dict.phase == 'Phase_Main1':
                     if self.game_dict.can_play_land:
@@ -60,7 +57,7 @@ class ArenaGladiator:
                     self.select_custom_or_default_play('main_phase_2')
 
                 else:
-                    print('espacio genérico en tu turno')
+                    self.execute.space()
 
             # TURNO OPONENTE
 
@@ -68,12 +65,12 @@ class ArenaGladiator:
                 self.execute.space()
 
             else:
-                print('espacio genérico')
                 self.execute.space()
 
             if not self.game_dict.active and not self.game_dict.hero_turn:
-                print('scan')
                 self.execute.scan_hand()
+
+        time.sleep(0.7)
 
         while self.app_status.screen == 'Confused':
             self.execute.concede()

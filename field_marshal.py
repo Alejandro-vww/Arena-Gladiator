@@ -21,10 +21,10 @@ class FieldMarshal:
     def cancel(self):
         raise NotImplementedError("This method must be implemented by the subclass.")
 
-    def check_declared_attackers(self, attack_order):
-        sorted_attack_order = sorted(attack_order, key=lambda instance: instance.instance_id)
+    def check_declared_attackers(self, attack_command):
+        sorted_attack_command = sorted(attack_command, key=lambda instance: instance.instance_id)
         sorted_attackers = sorted(self.attack_declared_creatures(), key=lambda instance: instance.instance_id)
-        return sorted_attack_order == sorted_attackers
+        return sorted_attack_command == sorted_attackers
 
     def attack_declared_creatures(self):
         return list(creature for creature in game_dict.instances.hero_battlefield if creature.attack_declared)
@@ -52,7 +52,6 @@ class FieldMarshal:
         if all(isinstance(grp_id, int) for grp_id in attackers):
             attackers = list(minion for minion in self.game_dict.instances.offensive_army if minion.grp_id in attackers)
         # Check if the requested attackers are correct
-        attackers = list(minion for minion in attackers if minion in game_dict.instances.offensive_army)
         attackers = list(minion for minion in attackers if minion.attack_ready)
         # Cancel attack if got an empty list
         if not attackers:
@@ -64,7 +63,7 @@ class FieldMarshal:
         if game_dict.declare_attackers_phase and len(attackers) == len(game_dict.instances.offensive_army):
             if len(self.attack_declared_creatures()) == 0:
                 self.space()
-                time.sleep(1)
+                time.sleep(0.6)
                 self.attack_villain()   # if planeswalker: select villain as objective
         # Select loop
         while game_dict.declare_attackers_phase and not self.check_declared_attackers(attackers):
@@ -89,7 +88,7 @@ class FieldMarshal:
             self.move_to(*self.coord.villain)
             time.sleep(0.2)
             self.click()
-            time.sleep(0.2)
+            time.sleep(0.4)
 
     def attack_if_kill(self):
         villain_army = game_dict.instances.villain_defensive_army
