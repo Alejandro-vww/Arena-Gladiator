@@ -1,35 +1,37 @@
+from game_dictionaries import GameDictionaries
 from instances.card import Card
-from game_dict import GameDict
 
-class Instances:
+
+class Instances(GameDictionaries):
+
     def __init__(self):
-        self.game_dict = GameDict()
-        self._instances = {}        #{inst_num: Card_obj}
-        self._game_state_id_v = 0
+        super().__init__()
+        self._instances = {}        # {inst_num: Card_obj}
+        self._game_state_id_inst = 0
 
     def _update(self):
-        for inst in self.game_dict.game_objects:
+        for inst in self.game_objects:
             self._instances[inst.get('instanceId')] = Card(inst)
-        self._game_state_id_v = self.game_dict.game_state_id
+        self._game_state_id_inst = self.game_state_id
 
-    def reset(self):
+    def reset_instances(self):
         self._instances = {}
-        self._game_state_id_v = 0
+        self._game_state_id_inst = 0
 
     def num(self, inst_no):
-        if self.game_dict.game_state_id > self._game_state_id_v:
+        if self.game_state_id > self._game_state_id_inst:
             self._update()
         return self._instances.get(inst_no, Card({}))
 
     def zone(self, zone_number):
-        for zone in self.game_dict.game_state.get('zones', []):
+        for zone in self.game_state.get('zones', []):
             if zone.get('zoneId') == zone_number:
                 return list(self.num(card) for card in zone.get('objectInstanceIds', []))
         return []
 
     @property
     def hand(self):
-        if hero_seat := self.game_dict.hero_seat_id:
+        if hero_seat := self.hero_seat_id:
             return self.zone(27 + hero_seat * 4) + self.commander
         return []
 
@@ -77,9 +79,8 @@ class Instances:
     def villain_defensive_army(self):
         return list(minion for minion in self.villain_army if not minion.tapped)
 
-
     @property
-    def mana(self):
+    def untapped_lands(self):
         return len(list(card for card in self.hero_battlefield if card.is_land and not card.tapped))
 
     @property

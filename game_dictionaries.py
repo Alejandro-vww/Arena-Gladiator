@@ -1,12 +1,9 @@
 import time
 from itertools import product
 import numpy as np
-import traceback
-
-from turn_info import TurnInfo
 
 
-class GameDict(TurnInfo):
+class GameDictionaries:
     _instance = None
     started = False
 
@@ -17,20 +14,24 @@ class GameDict(TurnInfo):
 
     def __init__(self):
         if not self.started:
-            from instances.instances import Instances
             from aplication_status import AplicationStatus
             self.started = True
 
             self.username = None
+            self.event_name = None
+            self.first_scan = False
             self.status = AplicationStatus()
             self.game_state = {}
             self.other_dicts = {}
             self.game_room_info = {}
-            self.instances = Instances()
             self.UI_state = {}
             self.client_2_match = {}
 
             self.last_actualization = None
+
+    @property
+    def game_state_id(self):
+        return self.game_state.get('gameStateId', 0)
 
     @property
     def hero_seat_id(self):
@@ -54,6 +55,11 @@ class GameDict(TurnInfo):
 
 
     @property
+    def deck(self):
+        connect_response = self.other_dicts.get('GREMessageType_ConnectResp', {})
+        return connect_response.get('connectResp', {}).get('deckMessage', {}).get('deckCards', [])
+
+    @property
     def actions(self):
         actions = self.other_dicts.get('GREMessageType_ActionsAvailableReq', {})
         if self.game_state_id >= actions.get('gameStateId', 0):
@@ -64,15 +70,6 @@ class GameDict(TurnInfo):
     @property
     def mana_actions(self):
         return list(action for action in self.actions if action.get('actionType') == 'ActionType_Activate_Mana')
-
-    @property
-    def game_state_id(self):
-        return self.game_state.get('gameStateId', 0)
-
-    @property
-    def cursor(self):
-        instance_id = self.UI_state.get('payload', {}).get('uiMessage', {}).get('onHover', {}).get('objectId')
-        return self.instances.num(instance_id)
 
     @property
     def request_id(self):
@@ -112,12 +109,6 @@ class GameDict(TurnInfo):
         options = list(int(numpy_int) for vector in options for numpy_int in vector)
         return options if options else [0, 0, 0, 0, 0, 0]
 
-    def wait(self):
-        time.sleep(0.4)
-        while not self.active and self.status.screen == 'Playing' or time.time() - self.last_actualization < 1.5:
-            time.sleep(0.5)
-
     def wait_reading(self):
         while time.time() - self.last_actualization < 0.3:
             time.sleep(0.15)
-

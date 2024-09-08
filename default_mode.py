@@ -2,7 +2,7 @@ import time
 
 from aplication_status import AplicationStatus
 from evaluator import Evaluator
-from game_dict import GameDict
+from game import GameDict
 from game_window.executor import Executor
 from evaluator import Evaluator
 from instances.card import Card
@@ -17,21 +17,21 @@ class DefaultMode:
     def mulligan():
         if game_dict.active and app_status.mulligan:
             if game_dict.mulligan_count == 0:
-                if 2 <= len(list(card for card in game_dict.instances.hand if card.is_land)) <= 4:
+                if 2 <= len(list(card for card in game_dict.hand if card.is_land)) <= 4:
                     execute.space()
                 else:
                     execute.mulligan()
             elif game_dict.mulligan_count == 1:
                 execute.space()
                 time.sleep(1)
-                if len(list(card for card in game_dict.instances.hand if card.is_land)) > 3:
+                if len(list(card for card in game_dict.hand if card.is_land)) > 3:
                     execute.mulligan_discard(0, position=True)
                 else:
                     execute.mulligan_discard(6, position=True)
 
     @staticmethod
     def play_land():
-        execute.play_card(list(card for card in game_dict.instances.hand if card.is_land))
+        execute.play_card(list(card for card in game_dict.hand if card.is_land))
 
     @staticmethod
     def main_phase_1():

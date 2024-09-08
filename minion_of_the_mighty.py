@@ -1,5 +1,5 @@
 from aplication_status import AplicationStatus
-from game_dict import GameDict
+from game import GameDict
 from game_window.executor import Executor
 from instances.card import Card
 
@@ -12,7 +12,7 @@ class MinionOfTheMighty:
 
     @staticmethod
     def mulligan():
-        hand = list(game_dict.instances.hand)
+        hand = list(game_dict.hand)
         Catalizadores = catalizadores(hand)
         Mana = tierras_dual_mono(hand)
         Descartar = []
@@ -153,7 +153,7 @@ class MinionOfTheMighty:
 
     @staticmethod
     def play_land():
-        if any(dual_land in game_dict.instances.hand for dual_land in [69407, 82302, 83949]):
+        if any(dual_land in game_dict.hand for dual_land in [69407, 82302, 83949]):
             Oliva.play_card([69407, 82302, 83949])
         elif Oliva.mesa.tierrasBajadas == 0:
             Oliva.play_card([73476, 77365, 70755], 'rojo')
@@ -165,7 +165,7 @@ class MinionOfTheMighty:
             elif spells[1] >= 2:
                 Oliva.play_card([73476, 77365, 70755], 'rojo')
                 # continue
-            elif 70755 in game_dict.instances.hand:
+            elif 70755 in game_dict.hand:
                 Oliva.play_card(70755)
                 # continue
             else:
@@ -183,7 +183,7 @@ class MinionOfTheMighty:
             elif spells[1] >= 1 and spells[2] >= 1:
                 Oliva.play_card([73476, 77365, 70755], 'verde')
                 # continue
-            elif 70755 in game_dict.instances.hand:
+            elif 70755 in game_dict.hand:
                 Oliva.play_card(70755)
                 # continue
             else:
@@ -217,7 +217,7 @@ class MinionOfTheMighty:
 
         # else:
             print('no tenemos combo')
-            Oliva.play_card(77261) if 77261 in game_dict.instances.hand else None
+            Oliva.play_card(77261) if 77261 in game_dict.hand else None
             print('avanzamos a combate')
             Oliva.space()
 
@@ -334,7 +334,7 @@ def catalizadores(mano):
     return catalizadores
 
 def max_buff():
-    buff_spells = catalizadores(game_dict.instances.hand)
+    buff_spells = catalizadores(game_dict.hand)
     return buff_spells[0] * 6 + sum(buff_spells[1:3]) * 3
 
 # Devuelve [nº tierras duales, nº mono, nº entran giradas] (el templo suma a dual y a girada)
@@ -387,10 +387,10 @@ def combo_breaker(mesa):
     print(any(criatura == 77261 and criatura.attack_ready for criatura in mesa.campoBatalla))
     if not any(criatura == 77261 and criatura.attack_ready for criatura in mesa.campoBatalla):
         print(f'campo batalla {list(criatura.dictionary for criatura in mesa.campoBatalla)}')
-    print(any_dragon(game_dict.instances.hand))
+    print(any_dragon(game_dict.hand))
     if any(criatura == 77261 and criatura.attack_ready for criatura in mesa.campoBatalla) and any_dragon(
-            game_dict.instances.hand):
-        spells = catalizadores(game_dict.instances.hand)
+            game_dict.hand):
+        spells = catalizadores(game_dict.hand)
         mana = mesa.mana
         print(f'Fuersa total: {sum(crtr.power for crtr in mesa.campoBatalla if crtr.attack_ready)}')
         if sum(crtr.power for crtr in mesa.campoBatalla if crtr.attack_ready) >= 6:

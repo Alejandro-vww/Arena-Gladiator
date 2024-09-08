@@ -1,11 +1,10 @@
 import time
 
 from aplication_status import AplicationStatus
-from game_dict import GameDict
+from game import GameDict
 from game_window.executor import Executor
 from zone_27 import Zone27
 
-from minion_of_the_mighty import MinionOfTheMighty
 from default_mode import DefaultMode
 
 
@@ -23,17 +22,17 @@ class ArenaGladiator:
     def play(self):
         # MULLIGAN
         while self.app_status.mulligan:
-            self.game_dict.wait()
+            self.game_dict.wait_action()
             self.select_custom_or_default_play('mulligan')
 
 
         # GAME
         while self.app_status.screen == 'Playing':
-            self.game_dict.wait()
+            self.game_dict.wait_action()
 
             # ZONE 27
-            if self.game_dict.instances.stack:
-                Zone27.solve(self.game_dict.instances.stack)
+            if self.game_dict.stack:
+                Zone27.solve(self.game_dict.stack)
 
             # HERO TURN
             if self.game_dict.hero_turn:
@@ -86,7 +85,7 @@ class ArenaGladiator:
     def advance_to_phase(self, phase):
         if phase not in self.phases:
             return False
-        self.game_dict.wait()
+        self.game_dict.wait_action()
         if self.game_dict.hero_turn and self.phases.index(phase) > self.phases.index(self.game_dict.phase):
             self.execute.space()
             time.sleep(0.2)

@@ -1,6 +1,6 @@
 import time
 
-from game_dict import GameDict
+from game import GameDict
 from aplication_status import AplicationStatus
 
 
@@ -31,11 +31,10 @@ class MessageProcessor:
                 self.game_dict.UI_state = transaction
         if username := transaction.get('authenticateResponse', {}).get('screenName'):
             self.game_dict.username = username
-        if transaction.get('CourseId'):
-            print(transaction)
+        if event_name := transaction.get('InternalEventName'):
+            self.game_dict.event_name = event_name
 
         self.game_dict.last_actualization = time.time()
-        pass
 
     def process_matchGameRoomStateChangedEvent(self, match_val):
         self.game_dict.game_room_info.update(match_val)
@@ -44,6 +43,7 @@ class MessageProcessor:
             self.app_status.screen = 'Playing'
             self.app_status.win = None
             self.app_status.mulligan = True
+            self.game_dict.first_scan = False
         else:
             self.app_status.screen = 'GameEnded'
             self.app_status.mulligan = False
@@ -116,7 +116,7 @@ class MessageProcessor:
     def reset_all_dictionary(self):
         self.game_dict.game_state = {}
         self.game_dict.game_room_info = {}
-        self.game_dict.instances.reset()
+        self.game_dict.reset_instances()
         self.game_dict.other_dicts = {}
         self.game_dict.UI_state = {}
         self.game_dict.client_2_match = {}

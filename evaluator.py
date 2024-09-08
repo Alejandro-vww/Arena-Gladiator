@@ -1,5 +1,5 @@
 from itertools import permutations
-from game_dict import GameDict
+from game import GameDict
 
 game_dict = GameDict()
 
@@ -8,8 +8,8 @@ class Evaluator:
 
     @staticmethod
     def card_value(card):
-        hand = game_dict.instances.hand
-        battlefield = game_dict.instances.hero_battlefield
+        hand = game_dict.hand
+        battlefield = game_dict.hero_battlefield
         max_card_cost = max(card.mana_cost for card in hand)
         total_mana = len(list(card for card in hand + battlefield if card.is_land))
         if total_mana > max_card_cost and card.is_land:
@@ -21,9 +21,9 @@ class Evaluator:
     @staticmethod
     def optimize(mana=None, hand=None, evaluation_function=None, penalization_function=None):
         if not mana:
-            mana = game_dict.instances.mana
+            mana = game_dict.untapped_lands
         if not hand:
-            hand = list(card for card in game_dict.instances.hand if not card.is_land)
+            hand = list(card for card in game_dict.hand if not card.is_land)
         if not evaluation_function:
             evaluation_function = Evaluator.card_value
 

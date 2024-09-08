@@ -11,8 +11,7 @@ def main():
 
 if __name__ == "__main__":
     LogReader.start_read()
-    while True:
-        time.sleep(1)
+    #main()
 
 
 

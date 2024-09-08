@@ -1,6 +1,6 @@
 import time
 
-from game_dict import GameDict
+from game import GameDict
 
 game_dict = GameDict()
 
@@ -27,7 +27,7 @@ class FieldMarshal:
         return sorted_attack_command == sorted_attackers
 
     def attack_declared_creatures(self):
-        return list(creature for creature in game_dict.instances.hero_battlefield if creature.attack_declared)
+        return list(creature for creature in game_dict.hero_battlefield if creature.attack_declared)
 
     def move_to_creatures(self, card_list):
         if not isinstance(card_list, list):
@@ -50,7 +50,7 @@ class FieldMarshal:
         if not isinstance(attackers, list):
             attackers = [attackers]
         if all(isinstance(grp_id, int) for grp_id in attackers):
-            attackers = list(minion for minion in self.game_dict.instances.offensive_army if minion.grp_id in attackers)
+            attackers = list(minion for minion in self.game_dict.offensive_army if minion.grp_id in attackers)
         # Check if the requested attackers are correct
         attackers = list(minion for minion in attackers if minion.attack_ready)
 
@@ -61,7 +61,7 @@ class FieldMarshal:
                 time.sleep(1)
             return
         # Use space if all attack
-        if game_dict.declare_attackers_phase and len(attackers) == len(game_dict.instances.offensive_army):
+        if game_dict.declare_attackers_phase and len(attackers) == len(game_dict.offensive_army):
             if len(self.attack_declared_creatures()) == 0:
                 self.space()
                 time.sleep(1)
@@ -86,23 +86,23 @@ class FieldMarshal:
         self.space()
 
     def attack_villain(self):
-        if any(permanent.is_planeswalker for permanent in game_dict.instances.villain_battlefield):
+        if any(permanent.is_planeswalker for permanent in game_dict.villain_battlefield):
             self.move_to(*self.coord.villain)
             time.sleep(0.2)
             self.click()
             time.sleep(0.4)
 
     def attack_if_kill(self):
-        villain_army = game_dict.instances.villain_defensive_army
+        villain_army = game_dict.villain_defensive_army
         max_enemy_toughness = max((minion.toughness for minion in villain_army), default=0)
         max_flying_enemy_toughness = max((minion.toughness for minion in villain_army if minion.fly), default=0)
         first_damage_enemies = list(minion for minion in villain_army if minion.first_strike or minion.double_strike)
         max_enemy_first_damage = max((minion.power for minion in first_damage_enemies), default=0)
         max_enemy_flying_first_damage = max((minion.power for minion in first_damage_enemies if minion.fly), default=0)
 
-        attackers = list(minion for minion in game_dict.instances.offensive_army if minion.power >= max_enemy_toughness)
+        attackers = list(minion for minion in game_dict.offensive_army if minion.power >= max_enemy_toughness)
         attackers = list(minion for minion in attackers if minion.toughness > max_enemy_first_damage)
-        own_flyers = list(minion for minion in game_dict.instances.offensive_army if minion.fly)
+        own_flyers = list(minion for minion in game_dict.offensive_army if minion.fly)
         flying_attackers = list(minion for minion in own_flyers if minion.power >= max_flying_enemy_toughness)
         flying_attackers = list(minion for minion in flying_attackers if minion.toughness > max_enemy_flying_first_damage)
         attackers.extend(minion for minion in flying_attackers if minion not in attackers)

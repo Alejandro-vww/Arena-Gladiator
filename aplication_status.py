@@ -1,5 +1,5 @@
 import time
-from game_dict import GameDict
+from game import GameDict
 
 max_playing_time = 30 * 60
 max_active_time = 30

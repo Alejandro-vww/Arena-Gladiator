@@ -1,6 +1,6 @@
 import pydirectinput
 import time
-import game_dict
+from game import GameDict
 from exceptions import EscPressedError
 from game_window.coordinates import Coordinates
 from log_reader import LogReader
@@ -22,7 +22,7 @@ class Executor(Recruiter, FieldMarshal):
 
     def __init__(self):
         if not self._started:
-            self.game_dict = game_dict.GameDict()
+            self.game_dict = GameDict()
             self.cards_location = {}
             self._started = True
             from game_window.window import Window
@@ -77,7 +77,7 @@ class Executor(Recruiter, FieldMarshal):
             cards = [cards]
 
         for card in cards:
-            if card not in self.game_dict.instances.hand or not self.select_card(card):
+            if card not in self.game_dict.hand or not self.select_card(card):
                 continue
             time.sleep(0.3)
             if self.game_dict.cursor == card:
@@ -90,7 +90,7 @@ class Executor(Recruiter, FieldMarshal):
         return False
 
     def select_card(self, card):
-        if card not in self.game_dict.instances.hand:
+        if card not in self.game_dict.hand:
             return False
         for _ in range(3):
             if int(card) in self.cards_location.keys():
@@ -150,7 +150,7 @@ class Executor(Recruiter, FieldMarshal):
                         return
             print('card not found')
 
-        hand = self.game_dict.instances.hand
+        hand = self.game_dict.hand
         hand.sort(key=grp_id_order)
         if not isinstance(cards, list):
             cards = [cards]

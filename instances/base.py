@@ -1,12 +1,14 @@
 from data_base.names_database import grpid_names
-from game_dict import GameDict
 
 
 class Base:
+    game_dict = None
 
     def __init__(self, dictionary):
         self._dictionary = dictionary
-        self.game_dict = GameDict()
+        if not Base.game_dict:
+            from game import GameDict
+            Base.game_dict = GameDict()
 
     def __eq__(self, other):
         return self.grp_id == other
@@ -19,7 +21,6 @@ class Base:
 
     def __int__(self):
         return int(self.grp_id)
-
 
     @property
     def instance_id(self):

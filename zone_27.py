@@ -1,6 +1,6 @@
 import time
 
-from game_dict import GameDict
+from game import GameDict
 from minion_of_the_mighty import MinionOfTheMighty
 from game_window.executor import Executor
 
@@ -13,8 +13,8 @@ class Zone27:
     @staticmethod
     def solve(grp_id):
         if grp_id == 143798:    #Select dragon to cast free
-            hand = game_dict.instances.hand
-            battlefield = game_dict.instances.hero_battlefield
+            hand = game_dict.hand
+            battlefield = game_dict.hero_battlefield
             legendary_dragons_played = list(card for card in battlefield if card.is_dragon and card.is_legendary)
             dragons = list(card for card in hand if card.is_dragon and card not in legendary_dragons_played)
             dragons.sort(key=MinionOfTheMighty.dragon_value, reverse=True)
