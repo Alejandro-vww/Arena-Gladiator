@@ -1,261 +1,329 @@
-from aplication_status import AplicationStatus
-from game import GameDict
-from game_window.executor import Executor
-from instances.card import Card
+import time
 
+from game.aplication_status import AplicationStatus
+from game.game import GameDict
+from game.controller.executor import Executor
+from game.game_objects.cards.card import Card
+from data_base.names_database import *
 
 game_dict = GameDict()
 app_status = AplicationStatus()
 execute = Executor()
 
+
 class MinionOfTheMighty:
 
     @staticmethod
     def mulligan():
-        hand = list(game_dict.hand)
-        Catalizadores = catalizadores(hand)
-        Mana = tierras_dual_mono(hand)
-        Descartar = []
-        if minion not in hand or not any_dragon(hand):
-            execute.mulligan() if game_dict.mulligan_count < 4 else execute.concede()
+        while game_dict.status.mulligan:
+            game_dict.wait_action()
+            hand = game_dict.hand
+            mull_count = game_dict.mulligan_count
 
-        if game_dict.mulligan_count == 0:
-            if max_buff() == 0 or sum(Mana) == 0 or sum(Mana) == 1 and max_buff() < 6:  # Descarta si no tienes Messi, dragón, tierras o te falta 1 tierra y 1 catalizador
+            # Concede if mulligan = 4 and no scale up with minion and dragon
+            if mull_count == 4:
+                execute.concede() if scale_up not in hand or not minion_with_dragon() else execute.space()
+                print('1')
+                break
+            # Discard if hand with no minion, no dragon or no land
+            elif not minion_dragon_land():
                 execute.mulligan()
-            elif sum(Mana) == 1 and not maximizar(hand) and Catalizadores[1] == 0 and Mana[0] == 0:  # Descarta si solo tienes una tierra monocolor y ningún catalizador rojo ni maximizar
+                print('2')
+            # Discard if mull count <= 1 and 2 or more card are needed
+            elif mull_count <= 1 and cards_needed() >= 2:
                 execute.mulligan()
+                print('3')
+            # Discard if 3 or more cards are needed
+            elif cards_needed() >= 3:
+                execute.mulligan()
+                print('4')
             else:
+                print('5')
                 execute.space()
+                break
 
-        elif game_dict.mulligan_count == 1:
-            if sum(Catalizadores) == 0 or sum(Mana) == 0 or sum(Mana) == 1 and Catalizadores[0] == 0 and sum(Catalizadores[
-                                                  0:3]) < 2:  # Descarta si no tienes Messi, dragón, tierras o te falta 1 tierra y 1 catalizador
-                return 'Mulligan'
-            elif sum(Mana) == 1:
-                if Catalizadores[0] == 0 and Catalizadores[1] == 0 and Mana[
-                    0] == 0:  # Descarta si solo tienes una tierra monocolor y ningún catalizador rojo ni maximizar
-                    return 'Mulligan'
-            if maximizar(hand):
-                if Mana[0] - Mana[2] > 0 and sum(Mana[
-                                                 0:2]) > 1:  # Comprueba que haya más de 1 tierra y que tengamos una dual no tempo para descartar el resto
-                    Descartar.append(ordenar_tierras(hand)[0])
-                elif sum(Mana[0:2]) > 2:  # Si hay 3 o más tierras
-                    Descartar.append(ordenar_tierras(hand)[0])
-                elif Mana[2] > 1:  # Si hay más de un templo que entra girado
-                    Descartar.append(ordenar_tierras(hand)[0])
-                elif sum(Catalizadores) > 1:
-                    Descartar.append(ordenar_hechizos(hand)[0])
-                elif contar_dragones(hand) > 1:
-                    Descartar.append(ordenar_dragones(hand)[0])
-                elif hand.count(
-                        77261) > 2:  # 2 tierras, maximizar y 1 dragón = 4, deben haber 3 messis o algo ha ido mal
-                    Descartar.append(77261)
-                else:
-                    print('fallo muligan con maximizar 1 a descartar')
-            else:  # Si no hay maximizar
-                if sum(Mana[0:2]) > 3:  # 4 o más tierras descartas una sí o sí
-                    Descartar.append(ordenar_tierras(hand)[0])
-                elif sum(Mana[0:2]) > 2:  # Si hay 3 o más tierras
-                    if catalizadores(hand)[
-                        1] > 0:  # Si tenemos un hechizo rojo no habría problema con tierras monocolor
-                        Descartar.append(ordenar_tierras(hand)[0])
-                    elif Mana[1] == 3 and catalizadores(hand)[
-                        2] > 1:  # Único caso en el que nos quedaríamos 3 tierras es si las 3 son monocolor y tenemos uno o más hechizos verdes, descartaríamos el segundo hechizo verde en espera de que nos caiga el segundo rojo y tendríamos tierra en caso de caiga el segundo verde
-                        Descartar.append(ordenar_hechizos(hand)[0])
-                    elif Mana[0] - Mana[2] > 0 or Mana[
-                        2] > 1:  # Si hay una dual no tempo o más de 1 dual tempo descartaríamos tierra tempo primero
-                        Descartar.append(ordenar_tierras(hand)[0])
-                    else:
-                        Descartar.append(ordenar_tierras(hand, dual=True)[
-                                             0])  # Falta el caso 2 mono 1 dual 2 hechizos verdes, descartas 1 verde esperando que caiga un rojo y si no pos adivinas con la tempo
-                elif sum(Catalizadores) > 2:
-                    Descartar.append(ordenar_hechizos(hand)[0])
-                elif contar_dragones(hand) > 1:
-                    Descartar.append(ordenar_dragones(hand)[0])
-                elif hand.count(
-                        77261) > 1:  # 3 tierras, 1 hechizo y 1 dragón o 2t 2h 1d = 5, deben haber 2 messis o algo ha ido mal
-                    Descartar.append(77261)
-                else:
-                    print('fallo muligan sin maximizar 1 a descartar')
-            return Descartar
+        time.sleep(1)
+        if not game_dict.status.screen == 'Playing':
+            return False
 
-        elif game_dict.mulligan_count == 2:
-            if not messi(hand) or not any_dragon(hand) or sum(Catalizadores) == 0 or sum(
-                    Mana) == 0:  # Descarta si no tienes Messi, dragón, tierras o hechizos
-                return 'Mulligan'
-            Descartar = hand.copy()
-            if maximizar(hand):
-                Descartar.remove(77261)
-                Descartar.remove(ordenar_dragones(hand)[-1])
-                Descartar.remove(ordenar_hechizos(hand)[-1])
-                Descartar.remove(ordenar_tierras(hand)[-1])
-                if Mana[0] - Mana[2] == 0 and sum(
-                        tierras_dual_mono(Descartar)) > 0:  # Si no hay tierra doble que entre enderezada
-                    Descartar.remove(ordenar_tierras(Descartar)[-1])
-                else:
-                    if 77261 in Descartar:
-                        Descartar.remove(77261)
-                    elif contar_dragones(Descartar) > 0:
-                        Descartar.remove(ordenar_dragones(Descartar)[-1])
-                    elif sum(catalizadores(Descartar)) > 0:
-                        Descartar.remove(ordenar_hechizos(Descartar)[-1])
-                    else:
-                        Descartar.remove(ordenar_tierras(Descartar, dual=True)[-1])
-            else:
-                Descartar.remove(77261)
-                Descartar.remove(ordenar_dragones(hand)[-1])
-                Descartar.remove(ordenar_hechizos(hand)[-1])
-                if Catalizadores[1] > 0:
-                    Descartar.remove(ordenar_tierras(hand)[-1])
-                else:
-                    Descartar.remove(ordenar_tierras(hand, dual=True)[-1])
-                if sum(tierras_dual_mono(Descartar)) > 0:
-                    Descartar.remove(ordenar_tierras(Descartar)[-1])
-                elif sum(catalizadores(Descartar)) > 0:
-                    Descartar.remove(ordenar_hechizos(Descartar)[-1])
-                elif 77261 in Descartar:
-                    Descartar.remove(77261)
-                else:
-                    Descartar.remove(ordenar_dragones(Descartar)[-1])
-            return Descartar
+        cards_to_keep = []
+        cards_to_discard = game_dict.hand
+        number_of_discards = game_dict.mulligan_count
 
-        elif game_dict.mulligan_count == 3:
-            if not messi(hand) or not any_dragon(hand) or sum(Catalizadores) == 0 and sum(Mana) < 2 or sum(
-                    Mana) == 0:  # Mínimo debes tener messi, dragón y (1 tierra 1 catalizador / 2 tierras)
-                return 'Mulligan'
-            Descartar = hand.copy()
-            if maximizar(hand):
-                Descartar.remove(77261)
-                Descartar.remove(ordenar_dragones(hand)[-1])
-                Descartar.remove(ordenar_hechizos(hand)[-1])
-                Descartar.remove(ordenar_tierras(hand, dual=True)[-1])
-            else:
-                Descartar.remove(77261)
-                Descartar.remove(ordenar_dragones(hand)[-1])
-                Descartar.remove(ordenar_tierras(hand, dual=True)[-1])
+        # Popping the cards to keep from the hand (hand = cards_to_discard)
+        pop_one_minion(cards_to_keep, cards_to_discard)
+        pop_one_dragon(cards_to_keep, cards_to_discard)
 
-                if sum(Catalizadores) > 0:  # Nos quedamos con el hechizo o la segunda tierra
-                    Descartar.remove(ordenar_hechizos(hand)[-1])
-                else:
-                    Descartar.remove(ordenar_tierras(Descartar, dual=True)[-1])
+        for _ in range(1):
+            # Minion, dragon + 1 Spell
+            pop_one_spell(cards_to_keep, cards_to_discard)
+            if len(cards_to_discard) == number_of_discards:
+                break
 
-            return Descartar
+            # Minion, dragon, spell + 2 land
+            pop_one_land(cards_to_keep, cards_to_discard)
+            if len(cards_to_discard) == number_of_discards:
+                break
+            pop_one_land(cards_to_keep, cards_to_discard)
+            if len(cards_to_discard) == number_of_discards:
+                break
 
-        elif game_dict.mulligan_count == 4:
-            Descartar = hand.copy()
-            if maximizar(hand) and messi(hand) and any_dragon(hand):
-                Descartar.remove(77261)
-                Descartar.remove(ordenar_dragones(hand)[-1])
-                Descartar.remove(ordenar_hechizos(hand)[-1])  # Será maximizar o algo falla
-                return Descartar
-            else:
-                return 'Concede'
+            # Minion, dragon, spell, 2 lands + 1 spell
+            pop_one_spell(cards_to_keep, cards_to_discard)
+            if len(cards_to_discard) == number_of_discards:
+                break
+
+            # Minion, dragon, 2 spells, 2 lands + 1 land
+            pop_one_land(cards_to_keep, cards_to_discard)
+            if len(cards_to_discard) == number_of_discards:
+                break
+
+            # Minion, dragon, 2 spells, 3 lands + 1 spell
+            pop_one_spell(cards_to_keep, cards_to_discard)
+            if len(cards_to_discard) == number_of_discards:
+                break
+            # + 1 minion + 1 dragon
+            pop_one_minion(cards_to_keep, cards_to_discard)
+            if len(cards_to_discard) == number_of_discards:
+                break
+            pop_one_dragon(cards_to_keep, cards_to_discard)
+            if len(cards_to_discard) == number_of_discards:
+                break
+            # + whatever
+            for _ in range(cards_to_discard - number_of_discards):
+                cards_to_keep.append(cards_to_discard.pop(0))
+
+        execute.mulligan_discard(cards_to_discard)
 
     @staticmethod
     def play_land():
-        if any(dual_land in game_dict.hand for dual_land in [69407, 82302, 83949]):
-            Oliva.play_card([69407, 82302, 83949])
-        elif Oliva.mesa.tierrasBajadas == 0:
-            Oliva.play_card([73476, 77365, 70755], 'rojo')
-        elif Oliva.mesa.tierrasBajadas == 1:
-            if spells[0] > 0 or spells[2] >= 2 or spells[1] > 0 and spells[
-                2] > 0:  # Con combo algún hechizo verde en mano baja verde, mínimo un rojo se debe tener a esta altura
-                Oliva.play_card([73476, 77365, 70755], 'verde')
-                # continue
-            elif spells[1] >= 2:
-                Oliva.play_card([73476, 77365, 70755], 'rojo')
-                # continue
-            elif 70755 in game_dict.hand:
-                Oliva.play_card(70755)
-                # continue
+        print('land')
+        total_lands_on_field = len(list(card for card in game_dict.hero_battlefield if card.is_land))
+        lands_in_hand = sorted(list(card for card in game_dict.hand if card.is_land), key=land_value, reverse=True)
+        buff_spells = buffing_spells_vector()
+
+        if total_lands_on_field == 0:
+            execute.play_custom_color_land(lands_in_hand[0], 'red')
+        elif buff_spells[0] + buff_spells[2] >= 1:
+            execute.play_custom_color_land(lands_in_hand[0], 'green')
+        elif buff_spells[1] >= 2:
+            execute.play_custom_color_land(lands_in_hand[0], 'red')
+        elif dual := list(card for card in lands_in_hand if card in all_dual_lands):
+            execute.play_cards(dual[0])
+        elif total_lands_on_field + len(lands_in_hand) >= 4:
+            # So you never end up with all lands in one color
+            if total_lands_on_field % 2 == 0:
+                execute.play_custom_color_land(lands_in_hand[0], 'red')
             else:
-                print('no tierra')
-                Oliva.space()
-                time.sleep(0.4)
-        elif Oliva.mesa.tierrasBajadas == 2 and max(opt[0] for opt in comb_mana) == max(
-                opt[1] for opt in comb_mana) == 1:  # 1 roja y 1 verde
-            if spells[1] >= 2:
-                Oliva.play_card([73476, 77365, 70755], 'rojo')
-                # continue
-            elif spells[0] > 0 or spells[2] >= 2:
-                Oliva.play_card([73476, 77365, 70755], 'verde')
-                # continue
-            elif spells[1] >= 1 and spells[2] >= 1:
-                Oliva.play_card([73476, 77365, 70755], 'verde')
-                # continue
-            elif 70755 in game_dict.hand:
-                Oliva.play_card(70755)
-                # continue
-            else:
-                print('no tierra')
-        else:
-            if max(opt[0] for opt in comb_mana) <= max(opt[1] for opt in comb_mana):
-                Oliva.play_card([73476, 77365, 70755], 'rojo')
-                # continue
-            else:
-                Oliva.play_card([73476, 77365, 70755], 'verde')
-                # continue
+                execute.play_custom_color_land(lands_in_hand[0], 'green')
+        time.sleep(1)
+        game_dict.wait_action()
+        MinionOfTheMighty.main_phase_1()
 
     @staticmethod
     def main_phase_1():
-        if combo_breaker(Oliva.mesa):
+        print('main')
+        if combo_breaker():
             print('tenemos combo')
-            if sum(crtr.power for crtr in Oliva.mesa.campoBatalla if crtr.attack_ready) >= 6:
-                print('avanzamos a combate')
-                Oliva.space()
-            else:
-                for criatura in Oliva.mesa.campoBatalla:
-                    if criatura == 77261 and criatura.attack_ready:
-                        instMessi = criatura.instance_id
-                if spells[0] > 0 and max(comb[1] for comb in comb_mana) > 0:
-                    Oliva.play_card(71520, instMessi)
-                elif spells[1] > 0 and max(comb[0] for comb in comb_mana) > 0:
-                    Oliva.play_card([71485, 77520, 54613], instMessi)
-                elif spells[2] > 0 and max(comb[1] for comb in comb_mana) > 0:
-                    Oliva.play_card([69613, 77317], instMessi)
+            if sum(creature.power for creature in game_dict.offensive_army) < 6:
+                max_mana = game_dict.max_mana_vector
+                minion_instance = list(creature for creature in game_dict.offensive_army if creature == minion)[0]
+                red_spells_in_hand = list(card for card in game_dict.hand if card in red_spells)
+                green_spells_in_hand = list(card for card in game_dict.hand if card in green_spells_plus_3)
+                if scale_up in game_dict.hand and max_mana[1] > 0:
+                    execute.cast_on(scale_up, minion_instance, option='left')
+                elif red_spells_in_hand and max_mana[0] > 0:
+                    execute.cast_on(red_spells_in_hand[0], minion_instance)
+                elif green_spells_in_hand and max_mana[1] > 0:
+                    execute.cast_on(green_spells_in_hand[0], minion_instance)
                 time.sleep(1.5)
-
-        # else:
-            print('no tenemos combo')
-            Oliva.play_card(77261) if 77261 in game_dict.hand else None
-            print('avanzamos a combate')
-            Oliva.space()
+            else:
+                return 'Phase_Combat'
+        elif minion in game_dict.hand and game_dict.max_mana_vector[0]:
+            execute.play_cards(minion)
+        else:
+            return 'Phase_Combat'
 
     @staticmethod
     def declare_attackers():
-        if sum(criatura.power for criatura in Oliva.mesa.campoBatalla if
-               criatura.attack_ready) >= 5:
-            Oliva.space()
-            if Oliva.mesa.planeswalkersVillain:
-                Oliva.movimiento_corregido(965, 120)
-                time.sleep(0.1)
-                Oliva.click()
+        print('atack')
+        if sum(creature.power for creature in game_dict.offensive_army) >= 6:
+            execute.attack_with_all()
         else:
-            Oliva.rechazar()
-            time.sleep(0.5)
-            Oliva.rechazar()
+            execute.cancel()
 
     @staticmethod
     def main_phase_2():
-        Oliva.play_card(77261) if 77261 in Oliva.mesa.mano else None
-        if Oliva.mesa.manaConTesoros > 6 and contar_dragones(Oliva.mesa.mano) > 0:
-            dragones = ordenar_dragones(Oliva.mesa.mano)
-            for dragon in dragones:
-                if dragon in Oliva.mesa.campoBatalla and dragon in [70792, 77302, 68653]:
-                    dragones.remove(dragon)
-            Oliva.play_card(dragones)
-        Oliva.space()
+        print('main 2')
+        execute.play_optimized_creatures(use_treasures=True)
+        return 'End_Turn'
 
-    @staticmethod
-    def dragon_value(card: Card):
-        if card == 70792:   #Monte venus
-            return 110
-        if card == 81664:
-            return 109
-        return card.mana_cost
 
-minion = 77261
-dual_lands = [69407, 82302, 83949]
+def dragons(hand=None):
+    if not hand:
+        hand = game_dict.hand
+    return list(card for card in hand if card.is_dragon)
+
+
+def minion_with_dragon(hand=None):
+    if not hand:
+        hand = game_dict.hand
+    return minion in hand and dragons(hand=hand)
+
+
+def minion_dragon_land(hand=None):
+    if not hand:
+        hand = game_dict.hand
+    return minion_with_dragon(hand=hand) and list(card for card in hand if card.is_land)
+
+
+def dragon_value(card: Card):
+    if card == 70792:   # Monte venus
+        return 110
+    if card == 81664:   # Oro anciano
+        return 109
+    return card.mana_cost if card.is_dragon else 0
+
+
+def buffing_spells_vector():
+    hand = game_dict.hand
+    # [Scale up, red, green, wild form (extra copies)]
+    buff_spells = [0, 0, 0, 0]
+    wild_form_counted = False
+    for card in hand:
+        if card == scale_up:
+            buff_spells[0] += 1
+        elif card in red_spells:
+            buff_spells[1] += 1
+        elif card == giant_growth:
+            buff_spells[2] += 1
+        elif card == wild_form and not wild_form_counted:
+            buff_spells[2] += 1
+            wild_form_counted = True
+        elif card == wild_form:
+            buff_spells[3] += 1
+    return buff_spells
+
+
+def max_buff():
+    buff_spells = buffing_spells_vector()
+    return buff_spells[0] * 6 + sum(buff_spells[1:3]) * 3
+
+
+def mana_for_buffs():   # [red, green, spells to be drawn]
+    hand = game_dict.hand
+    if scale_up in hand:
+        return [0, 1, 0]
+    buff_spells = buffing_spells_vector()
+    red = min(buff_spells[1], 2)        # You don´t need more than 2
+    green = min(buff_spells[2], 2)
+    return [red, green - red, max(2 - red - green, 0)]  # Again, you don't need more than 2
+
+
+def cards_needed() -> int:       # Spells + lands (+0.5 if spell and land don't match)
+    hand = game_dict.hand
+    hand_dual_lands = len(list(card for card in hand if card in all_dual_lands))
+    hand_mono_dual_lands = len(list(card for card in hand if card in mono_dual_lands))
+    total_lands = hand_dual_lands + hand_mono_dual_lands
+    mana_needed = mana_for_buffs()
+    # Scale up otherwise you should need at least 2 mana
+    if sum(mana_needed) == 1:
+        return 0 if hand_dual_lands >= 1 or total_lands >= 2 else 1
+    # 2 green spells
+    elif mana_needed[1] == 2:
+        if hand_dual_lands >= 1:
+            return max(2 - total_lands, 0)
+        else:
+            return max(3 - total_lands, 0)
+    # 2 spells (at least 1 should be red)
+    elif sum(mana_needed[:2]) == 2:
+        return max(2 - total_lands, 0)
+    # 1 red spell
+    elif mana_needed[0] == 1:
+        return max(2 - total_lands, 0) + 1
+    # 1 green spell
+    elif mana_needed[1] == 1:
+        if hand_dual_lands >= 1:
+            return max(2 - total_lands, 0) + 1
+        else:
+            return max(2.5 - total_lands, 0) + 1
+    # 0 spells
+    return max(2 - total_lands, 0) + 2
+
+
+def land_value(card):
+    if card in dual_fast_lands:
+        return 10
+    elif card in dual_slow_lands:
+        return 5
+    elif card in mono_dual_lands:
+        return 1
+    return 0
+
+
+def spell_value(card):
+    if card == scale_up:
+        return 10
+    elif card == titan_strength:
+        return 5
+    elif card in red_spells:
+        return 3
+    elif card in green_spells:
+        return 1
+    return 0
+
+
+def pop_one_minion(keep_list, discard_list):
+    if minion in discard_list:
+        index = discard_list.index(minion)
+        keep_list.append(discard_list.pop(index))
+
+
+def pop_one_dragon(keep_list, discard_list):
+    if dragons_list := sorted(dragons(hand=discard_list), key=dragon_value, reverse=True):
+        index = discard_list.index(dragons_list[0])
+        keep_list.append(discard_list.pop(index))
+
+
+def pop_one_spell(keep_list, discard_list):
+    if spell_list := list(card for card in discard_list if card in red_spells + green_spells):
+        spell_list.sort(key=spell_value, reverse=True)
+        index = discard_list.index(spell_list[0])
+        keep_list.append(discard_list.pop(index))
+
+
+def pop_one_land(keep_list, discard_list):
+    if land_list := list(card for card in discard_list):
+        land_list.sort(key=land_value, reverse=True)
+        index = discard_list.index(land_list[0])
+        keep_list.append(discard_list.pop(index))
+
+
+def combo_breaker():
+    offensive_power = sum(creature.power for creature in game_dict.offensive_army)
+    if minion in game_dict.offensive_army and dragons() and max_buff() + offensive_power >= 6:
+        if offensive_power >= 6:
+            return True
+
+        mana_needed = mana_for_buffs()
+        mana = game_dict.max_mana_vector
+        buff_spells = buffing_spells_vector()
+        # This prioritizes red spells, so you can lack a red land with 2 red + green spells and red, green lands
+        if min(mana[0] - mana_needed[0], mana[1] - mana_needed[1]) >= 0:
+            return True
+        # This check one red one green
+        if buff_spells[1] >= 1 and mana[0] >= 1 and buff_spells[2] >= 1 and mana[1] >= 1:
+            return True
+        # This check red or green spell + land
+        if offensive_power >= 3:
+            if buff_spells[1] >= 1 and mana[0] >= 1 or buff_spells[2] >= 1 and mana[1] >= 1:
+                return True
+        return False
+
+
+
+
+
 
 
 
@@ -333,10 +401,6 @@ def catalizadores(mano):
             catalizadores[3] += 1
     return catalizadores
 
-def max_buff():
-    buff_spells = catalizadores(game_dict.hand)
-    return buff_spells[0] * 6 + sum(buff_spells[1:3]) * 3
-
 # Devuelve [nº tierras duales, nº mono, nº entran giradas] (el templo suma a dual y a girada)
 def tierras_dual_mono(mano):
     recuento = []
@@ -381,40 +445,4 @@ def ordenar_dragones(mano):
     Mano = filter(lambda x: x in orden, mano)
     return sorted(Mano, key=lambda carta: orden.index(carta))
     # falta bajar en prioridad los legendarios repetidos
-
-def combo_breaker(mesa):
-    print('Tendremos combo?')
-    print(any(criatura == 77261 and criatura.attack_ready for criatura in mesa.campoBatalla))
-    if not any(criatura == 77261 and criatura.attack_ready for criatura in mesa.campoBatalla):
-        print(f'campo batalla {list(criatura.dictionary for criatura in mesa.campoBatalla)}')
-    print(any_dragon(game_dict.hand))
-    if any(criatura == 77261 and criatura.attack_ready for criatura in mesa.campoBatalla) and any_dragon(
-            game_dict.hand):
-        spells = catalizadores(game_dict.hand)
-        mana = mesa.mana
-        print(f'Fuersa total: {sum(crtr.power for crtr in mesa.campoBatalla if crtr.attack_ready)}')
-        if sum(crtr.power for crtr in mesa.campoBatalla if crtr.attack_ready) >= 6:
-            return True
-
-        elif sum(crtr.power for crtr in mesa.campoBatalla if crtr.attack_ready) >= 3:
-            if spells[0] > 0 and max(comb[1] for comb in mana) > 0:
-                return True
-            if spells[1] > 0 and max(comb[0] for comb in mana) > 0:
-                return True
-            if spells[2] > 0 and max(comb[1] for comb in mana) > 0:
-                return True
-            return False
-
-        elif sum(crtr.power for crtr in mesa.campoBatalla if crtr.attack_ready) >= 0:
-            if spells[0] > 0 and max(comb[1] for comb in mana) > 0:
-                return True
-            if spells[1] >= 2 and max(comb[0] for comb in mana) >= 2:
-                return True
-            if spells[2] >= 2 and max(comb[1] for comb in mana) >= 2:
-                return True
-            if spells[1] > 0 and spells[2] > 0 and max(comb[0] for comb in mana) > 0 and max(
-                    comb[1] for comb in mana) > 0 and mesa.tierras_enderezadas >= 2:
-                return True
-            return False
-
 

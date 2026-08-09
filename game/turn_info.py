@@ -1,6 +1,6 @@
 import time
 
-from game_dictionaries import GameDictionaries
+from game.game_objects.game_dictionaries import GameDictionaries
 
 
 class TurnInfo(GameDictionaries):

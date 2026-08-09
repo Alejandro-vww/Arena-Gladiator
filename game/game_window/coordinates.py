@@ -65,6 +65,40 @@ class Coordinates:
     def villain(self):
         return self.scale_x_1080p(965), self.scale_y_1080p(120)
 
+    @property
+    def left_card_option(self):
+        return self.scale_x_1080p(670), self.scale_y_1080p(450)
+
+    @property
+    def right_card_option(self):
+        return self.scale_x_1080p(1260), self.scale_y_1080p(450)
+
+    @property
+    def left_option(self):
+        return self.scale_x_1080p(780), self.scale_y_1080p(875)
+
+    @property
+    def right_option(self):
+        return self.scale_x_1080p(1135), self.scale_y_1080p(875)
+
+    def five_color_option(self, color):
+        if color == 'white':
+            return self.scale_x_1080p(970), self.scale_y_1080p(258)
+        elif color == 'blue':
+            return self.scale_x_1080p(970), self.scale_y_1080p(367)
+        elif color == 'black':
+            return self.scale_x_1080p(970), self.scale_y_1080p(480)
+        elif color == 'red':
+            return self.scale_x_1080p(970), self.scale_y_1080p(587)
+        elif color == 'green':
+            return self.scale_x_1080p(970), self.scale_y_1080p(690)
+        print('wrong color')
+        return self.scale_x_1080p(970), self.scale_y_1080p(587)
+
+
+
+
+
 
 
 

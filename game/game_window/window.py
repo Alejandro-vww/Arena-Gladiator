@@ -3,7 +3,7 @@ import os
 import tkinter as tk
 from tkinter import filedialog
 import time
-from aplication_status import AplicationStatus
+from game.aplication_status import AplicationStatus
 from user_config import launcher_path
 
 
@@ -26,7 +26,7 @@ class Window:
         if not self.hwnd:
             self.open()
             time.sleep(30)
-        from game_window.executor import Executor
+        from game.controller.executor import Executor
         self.execute = Executor()
 
     @property

@@ -1,5 +1,5 @@
-from game_dictionaries import GameDictionaries
-from instances.card import Card
+from game.game_objects.game_dictionaries import GameDictionaries
+from game.game_objects.cards.card import Card
 
 
 class Instances(GameDictionaries):
@@ -78,6 +78,14 @@ class Instances(GameDictionaries):
     @property
     def villain_defensive_army(self):
         return list(minion for minion in self.villain_army if not minion.tapped)
+
+    @property
+    def treasures_instances(self):
+        return list(card for card in self.hero_battlefield if card == 66615)
+
+    @property
+    def untapped_treasures(self):
+        return len(list(card for card in self.treasures_instances if not card.tapped))
 
     @property
     def untapped_lands(self):

@@ -1,12 +1,9 @@
 import time
 
-from aplication_status import AplicationStatus
+from game.aplication_status import AplicationStatus
+from game.game import GameDict
+from game.controller.executor import Executor
 from evaluator import Evaluator
-from game import GameDict
-from game_window.executor import Executor
-from evaluator import Evaluator
-from instances.card import Card
-
 
 game_dict = GameDict()
 app_status = AplicationStatus()
@@ -31,7 +28,7 @@ class DefaultMode:
 
     @staticmethod
     def play_land():
-        execute.play_card(list(card for card in game_dict.hand if card.is_land))
+        execute.play_cards(list(card for card in game_dict.hand if card.is_land))
 
     @staticmethod
     def main_phase_1():
@@ -46,7 +43,7 @@ class DefaultMode:
 
     @staticmethod
     def main_phase_2():
-        execute.space()
+        return 'End_Turn'
 
 
 

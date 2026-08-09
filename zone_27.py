@@ -1,8 +1,8 @@
 import time
 
-from game import GameDict
-from minion_of_the_mighty import MinionOfTheMighty
-from game_window.executor import Executor
+from game.game import GameDict
+from minion_of_the_mighty import dragon_value
+from game.controller.executor import Executor
 
 game_dict = GameDict()
 execute = Executor()
@@ -17,7 +17,7 @@ class Zone27:
             battlefield = game_dict.hero_battlefield
             legendary_dragons_played = list(card for card in battlefield if card.is_dragon and card.is_legendary)
             dragons = list(card for card in hand if card.is_dragon and card not in legendary_dragons_played)
-            dragons.sort(key=MinionOfTheMighty.dragon_value, reverse=True)
+            dragons.sort(key=dragon_value, reverse=True)
 
             if dragons and execute.select_card(dragons[0]):
                 time.sleep(0.3)

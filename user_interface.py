@@ -18,7 +18,7 @@ class Application(tk.Tk):
         self.number_label = tk.Label(frame_main, text="Number of victories:")
         self.number_label.grid(row=0, column=0, padx=5, pady=5, sticky="w")
 
-        # Entry for the number of wins, with half the length
+        # Entry for the number of wins
         self.number_entry = tk.Entry(frame_main, width=7)
         self.number_entry.grid(row=0, column=1, padx=(5, 10), pady=5, sticky="w")
         self.number_entry.insert(0, '15')

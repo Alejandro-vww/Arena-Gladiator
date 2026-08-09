@@ -14,7 +14,7 @@ class GameDictionaries:
 
     def __init__(self):
         if not self.started:
-            from aplication_status import AplicationStatus
+            from game.aplication_status import AplicationStatus
             self.started = True
 
             self.username = None
@@ -62,7 +62,7 @@ class GameDictionaries:
     @property
     def actions(self):
         actions = self.other_dicts.get('GREMessageType_ActionsAvailableReq', {})
-        if self.game_state_id >= actions.get('gameStateId', 0):
+        if self.game_state_id == actions.get('gameStateId', 0):
             return actions.get('actionsAvailableReq', {}).get('actions', [])
         else:
             return []
@@ -87,7 +87,7 @@ class GameDictionaries:
 
     # Mana
     @property
-    def mana(self):
+    def mana_vectors(self):
         mana_dic = {}
         mana_names = ['ManaColor_Red', 'ManaColor_Green', 'ManaColor_Blue', 'ManaColor_White', 'ManaColor_Black',
                       'ManaColor_Colorless']
@@ -106,9 +106,18 @@ class GameDictionaries:
         mana_combinations = list(product(*list(mana_dic.values())))
         options = list(sum(np.array(mana_vector) for mana_vector in combination) for combination in mana_combinations if combination)         # cada opción contiene una combinación de los posibles vectores RGBWBN que pueden dar las tierras bajadas, su suma y set dará las posibles combinaciones de maná
         options = set(tuple(mana_vector) for mana_vector in options)  # cada opción contiene una combinación de los posibles vectores RGBWBN que pueden dar las tierras bajadas, su suma y set dará las posibles combinaciones de maná
-        options = list(int(numpy_int) for vector in options for numpy_int in vector)
-        return options if options else [0, 0, 0, 0, 0, 0]
+        options = list(list(int(numpy_int) for numpy_int in vector) for vector in options)
+        print(options)
+        return options if options else [[0, 0, 0, 0, 0, 0]]
+
+    @property
+    def max_mana_vector(self):
+        max_mana = [0, 0, 0, 0, 0, 0]
+        for combination in self.mana_vectors:
+            max_mana = [max(max_mana[i], combination[i]) for i in range(6)]
+        return max_mana
+
 
     def wait_reading(self):
         while time.time() - self.last_actualization < 0.3:
-            time.sleep(0.15)
+            time.sleep(0.1)

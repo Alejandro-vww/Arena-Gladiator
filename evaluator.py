@@ -1,5 +1,5 @@
 from itertools import permutations
-from game import GameDict
+from game.game import GameDict
 
 game_dict = GameDict()
 

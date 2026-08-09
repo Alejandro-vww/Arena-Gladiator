@@ -1,6 +1,6 @@
-from instances.land import Land
-from instances.creature import Creature
-from instances.planeswalker import Planeswalker
+from game.game_objects.cards.land import Land
+from game.game_objects.cards.creature import Creature
+from game.game_objects.cards.planeswalker import Planeswalker
 
 
 class Card(Land, Creature, Planeswalker):
@@ -8,7 +8,7 @@ class Card(Land, Creature, Planeswalker):
     @property
     def cost_RGBWBN(self):
         try:
-            return sum(coste['count'] for coste in self._dictionary.get('manaCost'))
+            return sum(coste['count'] for coste in self.dictionary.get('manaCost'))
         except KeyError:
             return None
         except Exception as e:
@@ -17,7 +17,7 @@ class Card(Land, Creature, Planeswalker):
     @property
     def sum_cost(self):
         try:
-            return sum(coste['count'] for coste in self._dictionary.get('manaCost'))
+            return sum(coste['count'] for coste in self.dictionary.get('manaCost'))
         except KeyError:
             return None
         except Exception as e:
@@ -28,7 +28,7 @@ class Card(Land, Creature, Planeswalker):
     @property
     def planeswalker(self):
         try:
-            return True if 'CardType_Planeswalker' in self._dictionary.get('cardTypes') else False
+            return True if 'CardType_Planeswalker' in self.dictionary.get('cardTypes') else False
         except KeyError:
             print('Card property planeswalker KeyWord')
             return None

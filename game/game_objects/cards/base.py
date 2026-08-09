@@ -5,9 +5,9 @@ class Base:
     game_dict = None
 
     def __init__(self, dictionary):
-        self._dictionary = dictionary
+        self.dictionary = dictionary
         if not Base.game_dict:
-            from game import GameDict
+            from game.game import GameDict
             Base.game_dict = GameDict()
 
     def __eq__(self, other):
@@ -24,10 +24,10 @@ class Base:
 
     @property
     def instance_id(self):
-        return self._dictionary.get('instanceId')
+        return self.dictionary.get('instanceId')
     @property
     def grp_id(self):
-        return self._dictionary.get('grpId')
+        return self.dictionary.get('grpId')
 
     @property
     def related_action(self):
@@ -36,7 +36,7 @@ class Base:
 
     @property
     def owner(self):
-        return self._dictionary.get('ownerSeatId')
+        return self.dictionary.get('ownerSeatId')
 
     @property
     def owned(self):
@@ -44,8 +44,8 @@ class Base:
 
     @property
     def zone_id(self):
-        return self._dictionary.get('zoneId')
+        return self.dictionary.get('zoneId')
 
     @property
     def tapped(self):
-        return True if 'isTapped' in self._dictionary.keys() else False
+        return True if 'isTapped' in self.dictionary.keys() else False

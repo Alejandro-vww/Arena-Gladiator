@@ -2,7 +2,7 @@ import time
 import tkinter as tk
 from tkinter import filedialog
 from json_to_dict import JsonToDict
-from message_processor import MessageProcessor
+from game.mtga_log_reader.message_processor import MessageProcessor
 import threading
 import os
 from user_config import log_path
@@ -45,6 +45,7 @@ class LogReader:
                 LogReader.msg_processor.update(transaction) if transaction else None
 
             player_log, file_path_used = LogReader._open_log(file_path=file_path_used)
+            time.sleep(0.05)
 
     @staticmethod
     def _open_log(file_path=log_path):
@@ -64,7 +65,6 @@ class LogReader:
 
 if __name__ == '__main__':
     LogReader.start_read()
-    from game import GameDict
     while True:
         time.sleep(1)
 

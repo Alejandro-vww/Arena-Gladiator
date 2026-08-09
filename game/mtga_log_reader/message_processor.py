@@ -1,7 +1,7 @@
 import time
 
-from game import GameDict
-from aplication_status import AplicationStatus
+from game.game import GameDict
+from game.aplication_status import AplicationStatus
 
 
 class MessageProcessor:
@@ -11,6 +11,9 @@ class MessageProcessor:
         self.app_status = AplicationStatus()
 
     def update(self, transaction):
+
+        self.game_dict.last_actualization = time.time()
+
         # Changes in client screen
         if screen_val := transaction.get('toSceneName'):
             self.app_status.screen = screen_val
@@ -34,7 +37,6 @@ class MessageProcessor:
         if event_name := transaction.get('InternalEventName'):
             self.game_dict.event_name = event_name
 
-        self.game_dict.last_actualization = time.time()
 
     def process_matchGameRoomStateChangedEvent(self, match_val):
         self.game_dict.game_room_info.update(match_val)
@@ -72,14 +74,21 @@ class MessageProcessor:
                         self.game_dict.game_state[key] = game_state[key]
             elif game_state.get('type') == 'GameStateType_Full':
                 self.game_dict.game_state = game_state
+        elif message.get('type') == 'GREMessageType_OptionalActionMessage':
+            pass
+            # print(f'Podemos cancelar: {message.get("allowCancel")}')
+            # Utilidad terreno aplastador
         else:
             self.game_dict.other_dicts[message.get('type')] = message
 
     def process_actions(self):
         action = self.game_dict.client_2_match
-        if action.get('payload', {}).get('type') == 'ClientMessageType_MulliganResp':
+        payload = action.get('payload', {})
+        if payload.get('type') == 'ClientMessageType_MulliganResp':
             mulligan_resp = action.get('payload', {}).get('mulliganResp', {}).get('decision')
             self.app_status.mulligan = mulligan_resp == 'MulliganOption_Mulligan'
+        elif payload.get('type') == 'ClientMessageType_PerformActionResp':
+            pass
         else:
             pass
 

@@ -1,15 +1,15 @@
 import time
 
-from aplication_status import AplicationStatus
-from game import GameDict
-from game_window.executor import Executor
+from game.aplication_status import AplicationStatus
+from game.game import GameDict
+from game.controller.executor import Executor
 from zone_27 import Zone27
 
 from default_mode import DefaultMode
 
 
 class ArenaGladiator:
-    def __init__(self, custom_mode = None):
+    def __init__(self, custom_mode=None):
         self.game_dict = GameDict()
         self.app_status = AplicationStatus()
         self.execute = Executor()
@@ -17,7 +17,7 @@ class ArenaGladiator:
         self.mode = custom_mode
         self.default_mode = DefaultMode
         self.advance_to = None
-        self.phases = ["Phase_Beginning", "Phase_Main1", "Phase_Combat", "Phase_Main2", "Phase_Ending"]
+        self.phases = ["Phase_Beginning", "Phase_Main1", "Phase_Combat", "Phase_Main2", "Phase_Ending", "End_Turn"]
 
     def play(self):
         # MULLIGAN
@@ -77,10 +77,14 @@ class ArenaGladiator:
 
     def select_custom_or_default_play(self, phase_name):
         # Execute custom/default play_phase_function and then advance to the phase returned by that function
-        if hasattr(self.mode, phase_name):
-            exec(f'self.advance_to_phase(self.mode.{phase_name}())')
-        else:
-            exec(f'self.advance_to_phase(self.default_mode.{phase_name}())')
+        play_method = getattr(self.mode, phase_name, None) if self.mode else None
+        if play_method is None:
+            play_method = getattr(self.default_mode, phase_name, None)
+
+        if play_method is None:
+            return
+
+        self.advance_to_phase(play_method())
 
     def advance_to_phase(self, phase):
         if phase not in self.phases:
@@ -88,6 +92,6 @@ class ArenaGladiator:
         self.game_dict.wait_action()
         if self.game_dict.hero_turn and self.phases.index(phase) > self.phases.index(self.game_dict.phase):
             self.execute.space()
-            time.sleep(0.2)
+            time.sleep(0.7)
 
 

@@ -1,4 +1,4 @@
-from instances.base import Base
+from game.game_objects.cards.base import Base
 
 
 class Spell(Base):
