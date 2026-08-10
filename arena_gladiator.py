@@ -75,13 +75,13 @@ class ArenaGladiator:
             self.execute.concede()
             time.sleep(2)
 
+    # Try to find custom play function otherwise it uses the default one. If none of them exist, it presses space to advance to the next phase.
     def select_custom_or_default_play(self, phase_name):
         # Execute custom/default play_phase_function and then advance to the phase returned by that function
-        play_method = getattr(self.mode, phase_name, None) if self.mode else None
-        if play_method is None:
-            play_method = getattr(self.default_mode, phase_name, None)
+        play_method = getattr(self.mode, phase_name, None) or getattr(self.default_mode, phase_name, None)
 
         if play_method is None:
+            self.execute.space()
             return
 
         self.advance_to_phase(play_method())
