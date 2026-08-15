@@ -4,7 +4,7 @@ from pynput import keyboard
 
 
 # Playing function
-def  ºplaying_function(total_victories: int, power_off: bool):
+def  playing_function(total_victories: int, power_off: bool):
     from arena_gladiator import ArenaGladiator
     from game.controller.executor import Executor
     from game.mtga_log_reader.log_reader import LogReader
