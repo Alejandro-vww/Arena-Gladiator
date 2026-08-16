@@ -1,12 +1,12 @@
 import time
 
-from game.aplication_status import AplicationStatus
+from game.application_status import ApplicationStatus
 from game.game import GameDict
 from game.controller.executor import Executor
 from evaluator import Evaluator
 
 game_dict = GameDict()
-app_status = AplicationStatus()
+app_status = ApplicationStatus()
 execute = Executor()
 
 class DefaultMode:

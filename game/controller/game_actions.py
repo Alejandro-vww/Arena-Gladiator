@@ -1,6 +1,7 @@
 import pydirectinput
 import time
 
+import central_unit
 from game.game import GameDict
 from exceptions import EscPressedError
 from game.game_window.coordinates import Coordinates
@@ -9,24 +10,23 @@ pydirectinput.PAUSE = 0
 
 
 class GameActions:
-    _listeners_started = False
+    _instance = None
+    _started = False
 
-    def __init__(self, game=None, window=None, coord=None, central_unit_module=None):
-        self.game = game or GameDict()
-        self.cards_location = {}
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super().__new__(cls)
+        return cls._instance
 
-        from game.game_window.window import Window
-        self.window = window or Window()
-        self.coord = coord or Coordinates(self.window)
-
-        if central_unit_module is None:
-            import central_unit
-            central_unit_module = central_unit
-        self.central_unit = central_unit_module
-
-        if not GameActions._listeners_started:
-            self.central_unit.start_listeners()
-            GameActions._listeners_started = True
+    def __init__(self):
+        if not self._started:
+            self.game_dict = GameDict()
+            self.cards_location = {}
+            self._started = True
+            from game.game_window.window import Window
+            self.window = Window()
+            self.coord = Coordinates(self.window)
+            central_unit.start_listeners()
 
     def start_game(self):
         time_limit = 5 * 60
@@ -58,13 +58,13 @@ class GameActions:
         for _ in range(61):
             self.move_to(int(x_pos), height)
             time.sleep(0.075)
-            if self.game.cursor != last_cursor:  # Change in cursor
+            if self.game_dict.cursor != last_cursor:  # Change in cursor
                 if last_cursor is not None:  # Cursor leaving an instance
                     dictionary[last_cursor.grp_id] = int((beginning + x_pos) / 2)
                     beginning = x_pos
                 else:
                     beginning = x_pos
-                last_cursor = self.game.cursor
+                last_cursor = self.game_dict.cursor
             x_pos += jump
 
     def scan_hand(self):
@@ -75,10 +75,10 @@ class GameActions:
             cards = [cards]
 
         for card in cards:
-            if card not in self.game.hand or not self.select_card(card):
+            if card not in self.game_dict.hand or not self.select_card(card):
                 continue
             time.sleep(0.3)
-            if self.game.cursor == card:
+            if self.game_dict.cursor == card:
                 pydirectinput.mouseDown()
                 time.sleep(0.2)
                 pydirectinput.move(0, self.coord.scale_y_1080p(-900))
@@ -88,7 +88,7 @@ class GameActions:
         return False
 
     def select_card(self, card):
-        if card not in self.game.hand:
+        if card not in self.game_dict.hand:
             return False
         for _ in range(3):
             if int(card) in self.cards_location.keys():
@@ -99,7 +99,7 @@ class GameActions:
 
             for i in range(30):
                 self.move_to(next(x_coord), self.coord.height_hand)
-                if self.game.cursor == card:
+                if self.game_dict.cursor == card:
                     return True
         print('The card was not found')
         return False
@@ -112,14 +112,14 @@ class GameActions:
         try:
             instance_ids = list(card.instance_id for card in card_list)
         except AttributeError:
-            card_list_inst = list(card for card in self.game.hero_battlefield if card in card_list)
+            card_list_inst = list(card for card in self.game_dict.hero_battlefield if card in card_list)
             instance_ids = list(card.instance_id for card in card_list_inst)
 
         for x in range(1701, 200, -50):
             self.move_to(self.coord.scale_x_1080p(x), self.coord.scale_y_1080p(590))
             time.sleep(0.4)
-            instance_id = self.game.cursor.instance_id if self.game.cursor else None
-            if self.game.cursor and instance_id in instance_ids:
+            instance_id = self.game_dict.cursor.instance_id if self.game_dict.cursor else None
+            if self.game_dict.cursor and instance_id in instance_ids:
                 instance_ids.remove(instance_id)
                 yield
 
@@ -129,8 +129,8 @@ class GameActions:
     # LOW LEVEL MOUSE & KEYBOARDS FUNCTIONS
 
     def move_to(self, x, y, check=True):
-        if self.central_unit.stop:
-            self.central_unit.stop = False
+        if central_unit.stop:
+            central_unit.stop = False
             raise EscPressedError
         if check:
             pydirectinput.moveTo(x + self.window.left, y + self.window.top)
@@ -140,20 +140,20 @@ class GameActions:
 
 
     def move(self, x, y):
-        if self.central_unit.stop:
+        if central_unit.stop:
             raise EscPressedError
         pydirectinput.move(self.coord.scale_x_1080p(x), self.coord.scale_y_1080p(y))
         time.sleep(0.2)
 
     def click(self):
-        if self.central_unit.stop:
+        if central_unit.stop:
             raise EscPressedError
         pydirectinput.mouseDown()
         time.sleep(0.1)
         pydirectinput.mouseUp()
 
     def space(self):
-        if self.central_unit.stop:
+        if central_unit.stop:
             raise EscPressedError
         self.window.check_status()
         pydirectinput.keyDown("space")
@@ -161,7 +161,7 @@ class GameActions:
         pydirectinput.keyUp("space")
 
     def escape(self):
-        if self.central_unit.stop:
+        if central_unit.stop:
             raise EscPressedError
         pydirectinput.keyDown("escape")
         time.sleep(0.1)

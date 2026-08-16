@@ -1,14 +1,14 @@
 import time
 
 from game.game import GameDict
-from game.aplication_status import AplicationStatus
+from game.application_status import ApplicationStatus
 
 
 class MessageProcessor:
 
     def __init__(self):
         self.game_dict = GameDict()
-        self.app_status = AplicationStatus()
+        self.app_status = ApplicationStatus()
 
     def update(self, transaction):
 

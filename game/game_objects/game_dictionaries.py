@@ -14,13 +14,13 @@ class GameDictionaries:
 
     def __init__(self):
         if not self.started:
-            from game.aplication_status import AplicationStatus
+            from game.application_status import ApplicationStatus
             self.started = True
 
             self.username = None
             self.event_name = None
             self.first_scan = False
-            self.status = AplicationStatus()
+            self.status = ApplicationStatus()
             self.game_state = {}
             self.other_dicts = {}
             self.game_room_info = {}

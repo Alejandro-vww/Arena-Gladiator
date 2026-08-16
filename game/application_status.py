@@ -6,7 +6,7 @@ max_active_time = 30
 max_screen_time = 5 * 60
 
 
-class AplicationStatus:
+class ApplicationStatus:
     _instance = None
     _screen = None    #Home..., Playing, GameEnded, (Bugged)
     _win = None

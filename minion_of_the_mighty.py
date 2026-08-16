@@ -1,13 +1,13 @@
 import time
 
-from game.aplication_status import AplicationStatus
+from game.application_status import ApplicationStatus
 from game.game import GameDict
 from game.controller.executor import Executor
 from game.game_objects.cards.card import Card
 from data_base.names_database import *
 
 game_dict = GameDict()
-app_status = AplicationStatus()
+app_status = ApplicationStatus()
 execute = Executor()
 
 

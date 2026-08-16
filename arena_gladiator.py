@@ -1,6 +1,6 @@
 import time
 
-from game.aplication_status import AplicationStatus
+from game.application_status import ApplicationStatus
 from game.game import GameDict
 from game.controller.executor import Executor
 from zone_27 import Zone27
@@ -11,7 +11,7 @@ from default_mode import DefaultMode
 class ArenaGladiator:
     def __init__(self, custom_mode=None):
         self.game_dict = GameDict()
-        self.app_status = AplicationStatus()
+        self.app_status = ApplicationStatus()
         self.execute = Executor()
 
         self.mode = custom_mode

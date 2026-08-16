@@ -3,7 +3,7 @@ import os
 import tkinter as tk
 from tkinter import filedialog
 import time
-from game.aplication_status import AplicationStatus
+from game.application_status import ApplicationStatus
 from user_config import launcher_path
 
 
@@ -20,7 +20,7 @@ class Window:
     screen_width = win32api.GetSystemMetrics(0)
     screen_height = win32api.GetSystemMetrics(1)
 
-    status = AplicationStatus()
+    status = ApplicationStatus()
 
     def __init__(self):
         if not self.hwnd:
